@@ -1,0 +1,432 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.28;
+
+import "@fhevm/solidity/contracts/FHE.sol";
+
+/**
+ * @title Advanced FHEVM Feature Showcase
+ * @dev Comprehensive demonstration of homomorphic encryption capabilities with secure operations
+ * @notice This contract showcases the full spectrum of FHEVM features for decentralized development
+ * @author Enhanced Labs
+ */
+contract EnhancedFHEFeatureDemo {
+    using FHE for euint8;
+    using FHE for euint16;
+    using FHE for euint32;
+    using FHE for euint64;
+    using FHE for ebool;
+
+    // ============= EVENTS =============
+    event ArithmeticOperationPerformed(address indexed user, string operation, uint256 timestamp);
+    event ComparisonOperationPerformed(address indexed user, string operation, uint256 timestamp);
+    event BitwiseOperationPerformed(address indexed user, string operation, uint256 timestamp);
+    event ConditionalOperationPerformed(address indexed user, string operation, uint256 timestamp);
+    event DecryptionRequested(address indexed requester, uint256 requestId, string dataType);
+    event ChainlinkFeatureUnlocked(address indexed user, string feature, uint256 timestamp);
+
+    // ============= ERRORS =============
+    error Unauthorized();
+    error InvalidOperation();
+    error DecryptionInProgress();
+    error FeatureLocked();
+
+    // ============= STRUCTS =============
+    struct ChainlinkArithmetic {
+        euint32 sum;
+        euint32 difference;
+        euint32 product;
+        euint32 quotient;
+        euint32 remainder;
+        bool isUpdated;
+    }
+
+    struct OracleComparison {
+        ebool isEqual;
+        ebool isGreater;
+        ebool isLess;
+        ebool isGreaterOrEqual;
+        ebool isLessOrEqual;
+        ebool isNotEqual;
+        bool isUpdated;
+    }
+
+    struct DataFeedBitwise {
+        euint32 andResult;
+        euint32 orResult;
+        euint32 xorResult;
+        euint32 notResult;
+        euint32 leftShift;
+        euint32 rightShift;
+        bool isUpdated;
+    }
+
+    // ============= STATE VARIABLES =============
+    address public owner;
+    string public constant DEMO_NAME = "Enhanced FHEVM Feature Showcase";
+    uint256 public advancedOperationFee;
+    bool public premiumFeaturesEnabled;
+    
+    // Encrypted data storage for different types
+    mapping(address => euint8) public encryptedUint8Values;
+    mapping(address => euint16) public encryptedUint16Values;
+    mapping(address => euint32) public encryptedUint32Values;
+    mapping(address => euint64) public encryptedUint64Values;
+    mapping(address => ebool) public encryptedBoolValues;
+    
+    // Operation results
+    mapping(address => ChainlinkArithmetic) public arithmeticResults;
+    mapping(address => OracleComparison) public comparisonResults;
+    mapping(address => DataFeedBitwise) public bitwiseResults;
+    
+    // Feature unlocking system
+    mapping(address => mapping(string => bool)) public unlockedFeatures;
+    mapping(address => uint256) public userOperationCount;
+    mapping(address => uint256) public lastOperationTime;
+    
+    // Contract statistics
+    uint256 public totalOperations;
+    uint256 public totalUsers;
+    uint256 public contractCreatedAt;
+    
+    // Authorized users for secure operations
+    mapping(address => bool) public authorizedUsers;
+
+    // ============= MODIFIERS =============
+    modifier onlyOwner() {
+        if (msg.sender != owner) revert Unauthorized();
+        _;
+    }
+
+    modifier onlyAuthorized() {
+        if (msg.sender != owner && !authorizedUsers[msg.sender]) {
+            revert Unauthorized();
+        }
+        _;
+    }
+
+    modifier featureUnlocked(string memory feature) {
+        if (!unlockedFeatures[msg.sender][feature] && userOperationCount[msg.sender] < 5) {
+            revert FeatureLocked();
+        }
+        _;
+    }
+
+    // ============= CONSTRUCTOR =============
+    constructor() {
+        owner = msg.sender;
+        contractCreatedAt = block.timestamp;
+        authorizedUsers[owner] = true;
+        advancedOperationFee = 0.0005 ether; // 0.0005 ETH for premium operations
+        premiumFeaturesEnabled = true;
+        
+        // Unlock all features for owner
+        _unlockAllFeatures(owner);
+    }
+
+    // ============= ARITHMETIC OPERATIONS =============
+    
+    /**
+     * @dev Perform secure arithmetic operations on encrypted values
+     */
+    function performArithmeticOperations(
+        bytes32 encryptedA,
+        bytes32 encryptedB,
+        bytes calldata proofA,
+        bytes calldata proofB
+    ) external onlyAuthorized {
+        euint32 a = FHE.asEuint32(encryptedA, proofA);
+        euint32 b = FHE.asEuint32(encryptedB, proofB);
+        
+        arithmeticResults[msg.sender] = ChainlinkArithmetic({
+            sum: a.add(b),
+            difference: a.sub(b),
+            product: a.mul(b),
+            quotient: a.div(b),
+            remainder: a.rem(b),
+            isUpdated: true
+        });
+        
+        _updateUserStats("arithmetic");
+        emit ArithmeticOperationPerformed(msg.sender, "full_arithmetic_suite", block.timestamp);
+    }
+
+    /**
+     * @dev Perform secure addition operation
+     */
+    function addEncrypted(
+        bytes32 encryptedA,
+        bytes32 encryptedB,
+        bytes calldata proofA,
+        bytes calldata proofB
+    ) external onlyAuthorized returns (euint32) {
+        euint32 a = FHE.asEuint32(encryptedA, proofA);
+        euint32 b = FHE.asEuint32(encryptedB, proofB);
+        euint32 result = a.add(b);
+        
+        encryptedUint32Values[msg.sender] = result;
+        _updateUserStats("addition");
+        
+        emit ArithmeticOperationPerformed(msg.sender, "addition", block.timestamp);
+        return result;
+    }
+
+    /**
+     * @dev Perform secure multiplication operation
+     */
+    function multiplyEncrypted(
+        bytes32 encryptedA,
+        bytes32 encryptedB,
+        bytes calldata proofA,
+        bytes calldata proofB
+    ) external onlyAuthorized featureUnlocked("multiplication") returns (euint32) {
+        euint32 a = FHE.asEuint32(encryptedA, proofA);
+        euint32 b = FHE.asEuint32(encryptedB, proofB);
+        euint32 result = a.mul(b);
+        
+        encryptedUint32Values[msg.sender] = result;
+        _updateUserStats("multiplication");
+        
+        emit ArithmeticOperationPerformed(msg.sender, "multiplication", block.timestamp);
+        return result;
+    }
+
+    // ============= COMPARISON OPERATIONS =============
+    
+    /**
+     * @dev Perform secure comparison operations
+     */
+    function performComparisonOperations(
+        bytes32 encryptedA,
+        bytes32 encryptedB,
+        bytes calldata proofA,
+        bytes calldata proofB
+    ) external onlyAuthorized featureUnlocked("comparisons") {
+        euint32 a = FHE.asEuint32(encryptedA, proofA);
+        euint32 b = FHE.asEuint32(encryptedB, proofB);
+        
+        comparisonResults[msg.sender] = OracleComparison({
+            isEqual: a.eq(b),
+            isGreater: a.gt(b),
+            isLess: a.lt(b),
+            isGreaterOrEqual: a.gte(b),
+            isLessOrEqual: a.lte(b),
+            isNotEqual: a.ne(b),
+            isUpdated: true
+        });
+        
+        _updateUserStats("comparison");
+        emit ComparisonOperationPerformed(msg.sender, "full_comparison_suite", block.timestamp);
+    }
+
+    // ============= BITWISE OPERATIONS =============
+    
+    /**
+     * @dev Perform secure bitwise operations
+     */
+    function performBitwiseOperations(
+        bytes32 encryptedA,
+        bytes32 encryptedB,
+        bytes calldata proofA,
+        bytes calldata proofB
+    ) external onlyAuthorized featureUnlocked("bitwise") {
+        euint32 a = FHE.asEuint32(encryptedA, proofA);
+        euint32 b = FHE.asEuint32(encryptedB, proofB);
+        
+        bitwiseResults[msg.sender] = DataFeedBitwise({
+            andResult: a.and(b),
+            orResult: a.or(b),
+            xorResult: a.xor(b),
+            notResult: a.not(),
+            leftShift: a.shl(FHE.asEuint32(1)),
+            rightShift: a.shr(FHE.asEuint32(1)),
+            isUpdated: true
+        });
+        
+        _updateUserStats("bitwise");
+        emit BitwiseOperationPerformed(msg.sender, "full_bitwise_suite", block.timestamp);
+    }
+
+    // ============= CONDITIONAL OPERATIONS =============
+    
+    /**
+     * @dev Perform secure conditional selection
+     */
+    function conditionalSelect(
+        bytes32 encryptedCondition,
+        bytes32 encryptedTrueValue,
+        bytes32 encryptedFalseValue,
+        bytes calldata conditionProof,
+        bytes calldata trueProof,
+        bytes calldata falseProof
+    ) external onlyAuthorized featureUnlocked("conditional") returns (euint32) {
+        ebool condition = FHE.asEbool(encryptedCondition, conditionProof);
+        euint32 trueValue = FHE.asEuint32(encryptedTrueValue, trueProof);
+        euint32 falseValue = FHE.asEuint32(encryptedFalseValue, falseProof);
+        
+        euint32 result = FHE.select(condition, trueValue, falseValue);
+        encryptedUint32Values[msg.sender] = result;
+        
+        _updateUserStats("conditional");
+        emit ConditionalOperationPerformed(msg.sender, "select", block.timestamp);
+        
+        return result;
+    }
+
+    // ============= MULTI-TYPE OPERATIONS =============
+    
+    /**
+     * @dev Store encrypted values of different secure types
+     */
+    function storeMultiTypeValues(
+        bytes32 encrypted8,
+        bytes32 encrypted16,
+        bytes32 encrypted32,
+        bytes32 encrypted64,
+        bytes32 encryptedBool,
+        bytes calldata proof8,
+        bytes calldata proof16,
+        bytes calldata proof32,
+        bytes calldata proof64,
+        bytes calldata proofBool
+    ) external onlyAuthorized {
+        encryptedUint8Values[msg.sender] = FHE.asEuint8(encrypted8, proof8);
+        encryptedUint16Values[msg.sender] = FHE.asEuint16(encrypted16, proof16);
+        encryptedUint32Values[msg.sender] = FHE.asEuint32(encrypted32, proof32);
+        encryptedUint64Values[msg.sender] = FHE.asEuint64(encrypted64, proof64);
+        encryptedBoolValues[msg.sender] = FHE.asEbool(encryptedBool, proofBool);
+        
+        _updateUserStats("multi_type_storage");
+        emit ChainlinkFeatureUnlocked(msg.sender, "multi_type_storage", block.timestamp);
+    }
+
+    // ============= ADMIN FUNCTIONS =============
+    
+    /**
+     * @dev Authorize a new secure user
+     */
+    function authorizeUser(address user) external onlyOwner {
+        authorizedUsers[user] = true;
+        if (userOperationCount[user] == 0) {
+            totalUsers++;
+        }
+    }
+
+    /**
+     * @dev Unlock specific secure feature for user
+     */
+    function unlockFeature(address user, string memory feature) external onlyOwner {
+        unlockedFeatures[user][feature] = true;
+        emit ChainlinkFeatureUnlocked(user, feature, block.timestamp);
+    }
+
+    /**
+     * @dev Unlock all secure features for user
+     */
+    function unlockAllFeaturesForUser(address user) external onlyOwner {
+        _unlockAllFeatures(user);
+    }
+
+    // ============= VIEW FUNCTIONS =============
+    
+    /**
+     * @dev Get user's encrypted value by type
+     */
+    function getUserEncryptedValue(address user, string memory valueType) 
+        external 
+        view 
+        returns (bytes32) 
+    {
+        if (keccak256(bytes(valueType)) == keccak256(bytes("uint8"))) {
+            return bytes32(uint256(euint8.unwrap(encryptedUint8Values[user])));
+        } else if (keccak256(bytes(valueType)) == keccak256(bytes("uint16"))) {
+            return bytes32(uint256(euint16.unwrap(encryptedUint16Values[user])));
+        } else if (keccak256(bytes(valueType)) == keccak256(bytes("uint32"))) {
+            return bytes32(uint256(euint32.unwrap(encryptedUint32Values[user])));
+        } else if (keccak256(bytes(valueType)) == keccak256(bytes("uint64"))) {
+            return bytes32(uint256(euint64.unwrap(encryptedUint64Values[user])));
+        } else if (keccak256(bytes(valueType)) == keccak256(bytes("bool"))) {
+            return bytes32(uint256(ebool.unwrap(encryptedBoolValues[user])));
+        }
+        revert InvalidOperation();
+    }
+
+    /**
+     * @dev Get comprehensive contract statistics
+     */
+    function getContractStats() external view returns (
+        string memory name,
+        uint256 totalOps,
+        uint256 totalUsersCount,
+        uint256 createdTime,
+        address contractOwner
+    ) {
+        return (
+            DEMO_NAME,
+            totalOperations,
+            totalUsers,
+            contractCreatedAt,
+            owner
+        );
+    }
+
+    /**
+     * @dev Get user's secure feature status
+     */
+    function getUserFeatureStatus(address user) external view returns (
+        bool hasArithmetic,
+        bool hasComparison,
+        bool hasBitwise,
+        bool hasConditional,
+        bool hasMultiType,
+        uint256 operationCount,
+        uint256 lastActivity
+    ) {
+        return (
+            unlockedFeatures[user]["arithmetic"] || userOperationCount[user] >= 5,
+            unlockedFeatures[user]["comparisons"] || userOperationCount[user] >= 5,
+            unlockedFeatures[user]["bitwise"] || userOperationCount[user] >= 5,
+            unlockedFeatures[user]["conditional"] || userOperationCount[user] >= 5,
+            unlockedFeatures[user]["multi_type_storage"] || userOperationCount[user] >= 5,
+            userOperationCount[user],
+            lastOperationTime[user]
+        );
+    }
+
+    /**
+     * @dev Check if user has specific secure feature unlocked
+     */
+    function isFeatureUnlocked(address user, string memory feature) external view returns (bool) {
+        return unlockedFeatures[user][feature] || userOperationCount[user] >= 5;
+    }
+
+    // ============= INTERNAL FUNCTIONS =============
+    
+    /**
+     * @dev Update user statistics for secure tracking
+     */
+    function _updateUserStats(string memory operation) internal {
+        if (userOperationCount[msg.sender] == 0) {
+            totalUsers++;
+        }
+        
+        userOperationCount[msg.sender]++;
+        lastOperationTime[msg.sender] = block.timestamp;
+        totalOperations++;
+        
+        // Auto-unlock features after 5 operations
+        if (userOperationCount[msg.sender] == 5) {
+            _unlockAllFeatures(msg.sender);
+        }
+    }
+
+    /**
+     * @dev Unlock all secure features for a user
+     */
+    function _unlockAllFeatures(address user) internal {
+        string[5] memory features = ["arithmetic", "comparisons", "bitwise", "conditional", "multi_type_storage"];
+        
+        for (uint i = 0; i < features.length; i++) {
+            unlockedFeatures[user][features[i]] = true;
+        }
+    }
+}

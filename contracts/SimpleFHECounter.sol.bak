@@ -1,0 +1,43 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.28;
+
+import "@fhevm/solidity/contracts/FHE.sol";
+
+contract FHECounter {
+    using FHE for euint32;
+
+    // Events
+    event CounterIncremented(address indexed user);
+    event CounterDecremented(address indexed user);
+
+    // State
+    euint32 private encryptedCount;
+    address public owner;
+
+    // Modifiers
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not owner");
+        _;
+    }
+
+    constructor() {
+        owner = msg.sender;
+        encryptedCount = FHE.asEuint32(0);
+    }
+
+    function increment(bytes32 inputEuint32, bytes calldata inputProof) external {
+        euint32 value = FHE.asEuint32(inputEuint32, inputProof);
+        encryptedCount = encryptedCount.add(value);
+        emit CounterIncremented(msg.sender);
+    }
+
+    function decrement(bytes32 inputEuint32, bytes calldata inputProof) external {
+        euint32 value = FHE.asEuint32(inputEuint32, inputProof);
+        encryptedCount = encryptedCount.sub(value);
+        emit CounterDecremented(msg.sender);
+    }
+
+    function getCount() external view returns (euint32) {
+        return encryptedCount;
+    }
+}

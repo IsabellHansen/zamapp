@@ -1,0 +1,357 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.28;
+
+import "@fhevm/solidity/contracts/FHE.sol";
+
+/**
+ * @title Advanced FHE Counter
+ * @dev Secure encrypted counter with homomorphic operations and data validation
+ * @notice This contract provides secure counting operations with access control
+ * @author Enhanced Labs
+ */
+contract EnhancedFHECounter {
+    using FHE for euint32;
+
+    // ============= EVENTS =============
+    event CounterIncremented(address indexed user, uint256 timestamp);
+    event CounterDecremented(address indexed user, uint256 timestamp);
+    event CounterReset(address indexed admin, uint256 timestamp);
+    event DecryptionRequested(address indexed requester, uint256 requestId);
+    event DecryptionFulfilled(uint256 indexed requestID);
+    event CounterPhaseChanged(CounterStatus newPhase);
+
+    // ============= ERRORS =============
+    error Unauthorized();
+    error CounterPaused();
+    error InvalidOperation();
+    error DecryptionInProgress();
+
+    // ============= ENUMS =============
+    enum CounterStatus { 
+        ACTIVE,           // Counter active
+        PAUSED,           // Counter pause
+        DECRYPTING,       // Decryption in progress
+        MAINTENANCE       // Maintenance mode
+    }
+
+    // ============= STATE VARIABLES =============
+    address public owner;
+    string public constant COUNTER_NAME = "Enhanced FHE Counter";
+    uint256 public operationFee;
+    uint256 public contractBalance;
+    
+    // Encrypted counter state
+    euint32 private encryptedCount;
+    uint32 public decryptedCount;
+    bool public isCountDecrypted;
+    
+    // Phase management
+    CounterStatus public status;
+    uint256 public totalOperations;
+    uint256 public createdAt;
+    uint256 public lastOperationTime;
+    
+    // Decryption management
+    uint256 private decryptionRequestId;
+    bool private decryptionInProgress;
+    
+    // Access configuration
+    mapping(address => bool) public authorizedUsers;
+    mapping(address => uint256) public userOperations;
+    mapping(address => uint256) public userFeesPaid;
+    uint256 public totalFeesCollected;
+
+    // ============= MODIFIERS =============
+    modifier onlyOwner() {
+        if (msg.sender != owner) revert Unauthorized();
+        _;
+    }
+
+    modifier onlyAuthorized() {
+        if (msg.sender != owner && !authorizedUsers[msg.sender]) {
+            revert Unauthorized();
+        }
+        _;
+    }
+
+    modifier whenActive() {
+        if (status != CounterStatus.ACTIVE) revert CounterPaused();
+        _;
+    }
+
+    modifier whenNotDecrypting() {
+        if (decryptionInProgress) revert DecryptionInProgress();
+        _;
+    }
+
+    // ============= CONSTRUCTOR =============
+    constructor() {
+        owner = msg.sender;
+        encryptedCount = FHE.asEuint32(0);
+        decryptedCount = 0;
+        isCountDecrypted = true;
+        status = CounterStatus.ACTIVE;
+        createdAt = block.timestamp;
+        lastOperationTime = block.timestamp;
+        
+        // Auto-authorize owner
+        authorizedUsers[owner] = true;
+        operationFee = 0.001 ether; // 0.001 ETH per operation
+        contractBalance = 0;
+        totalFeesCollected = 0;
+    }
+
+    // ============= CORE OPERATIONS =============
+    
+    /**
+     * @dev Increment the encrypted counter by a secure value
+     * @param inputEuint32 The encrypted value to add to the counter
+     * @param inputProof The proof for the encrypted input
+     */
+    function increment(bytes32 inputEuint32, bytes calldata inputProof) 
+        external 
+        payable
+        onlyAuthorized 
+        whenActive 
+        whenNotDecrypting 
+    {
+        require(msg.value >= operationFee, "Insufficient fee");
+        
+        euint32 value = FHE.asEuint32(inputEuint32, inputProof);
+        encryptedCount = encryptedCount.add(value);
+        
+        _processFee();
+        _updateOperationStats();
+        emit CounterIncremented(msg.sender, block.timestamp);
+    }
+
+    /**
+     * @dev Decrement the encrypted counter by a secure value
+     * @param inputEuint32 The encrypted value to subtract from the counter
+     * @param inputProof The proof for the encrypted input
+     */
+    function decrement(bytes32 inputEuint32, bytes calldata inputProof) 
+        external 
+        payable
+        onlyAuthorized 
+        whenActive 
+        whenNotDecrypting 
+    {
+        require(msg.value >= operationFee, "Insufficient fee");
+        
+        euint32 value = FHE.asEuint32(inputEuint32, inputProof);
+        encryptedCount = encryptedCount.sub(value);
+        
+        _processFee();
+        _updateOperationStats();
+        emit CounterDecremented(msg.sender, block.timestamp);
+    }
+
+    // ============= DECRYPTION MANAGEMENT =============
+    
+    /**
+     * @dev Request secure revelation of the current counter value
+     */
+    function requestCountDecryption() external onlyAuthorized whenNotDecrypting {
+        decryptionInProgress = true;
+        status = CounterStatus.DECRYPTING;
+        
+        decryptionRequestId = FHE.decrypt(encryptedCount);
+        
+        emit DecryptionRequested(msg.sender, decryptionRequestId);
+        emit CounterPhaseChanged(CounterStatus.DECRYPTING);
+    }
+
+    /**
+     * @dev Callback function for secure decryption fulfillment
+     * @param requestId The request identifier
+     * @param countValue The revealed count value
+     * @param signatures The signatures for verification
+     */
+    function callbackDecryptCount(
+        uint256 requestId,
+        uint32 countValue,
+        bytes[] calldata signatures
+    ) external {
+        if (requestId == decryptionRequestId) {
+            decryptedCount = countValue;
+            isCountDecrypted = true;
+            decryptionInProgress = false;
+            status = CounterStatus.ACTIVE;
+            
+            emit DecryptionFulfilled(requestId);
+            emit CounterPhaseChanged(CounterStatus.ACTIVE);
+        }
+    }
+
+    // ============= ADMIN FUNCTIONS =============
+    
+    /**
+     * @dev Authorize a new secure user
+     * @param user The address to grant access to
+     */
+    function authorizeUser(address user) external onlyOwner {
+        authorizedUsers[user] = true;
+    }
+
+    /**
+     * @dev Revoke secure access from a user
+     * @param user The address to revoke access from
+     */
+    function revokeUser(address user) external onlyOwner {
+        if (user != owner) {
+            authorizedUsers[user] = false;
+        }
+    }
+
+    /**
+     * @dev Set the counter phase status
+     * @param newStatus The new phase to enter
+     */
+    function setCounterStatus(CounterStatus newStatus) external onlyOwner {
+        status = newStatus;
+        emit CounterPhaseChanged(newStatus);
+    }
+
+    /**
+     * @dev Emergency pause the secure counter
+     */
+    function pauseCounter() external onlyOwner {
+        status = CounterStatus.PAUSED;
+        emit CounterPhaseChanged(CounterStatus.PAUSED);
+    }
+
+    /**
+     * @dev Resume secure counter operations
+     */
+    function resumeCounter() external onlyOwner {
+        status = CounterStatus.ACTIVE;
+        emit CounterPhaseChanged(CounterStatus.ACTIVE);
+    }
+
+    // ============= VIEW FUNCTIONS =============
+    
+    /**
+     * @dev Get the encrypted secure counter value
+     */
+    function getCount() external view onlyAuthorized returns (euint32) {
+        return encryptedCount;
+    }
+
+    /**
+     * @dev Get the decrypted count value
+     */
+    function getDecryptedCount() external view returns (uint32) {
+        return decryptedCount;
+    }
+
+    /**
+     * @dev Get the current counter phase status
+     */
+    function getCounterStatus() external view returns (CounterStatus) {
+        return status;
+    }
+
+    /**
+     * @dev Check if the count has been revealed through secure decryption
+     */
+    function isCountDecrypted() external view returns (bool) {
+        return isCountDecrypted;
+    }
+
+    /**
+     * @dev Get comprehensive secure counter statistics
+     */
+    function getCounterStats() external view returns (
+        string memory name,
+        CounterStatus currentStatus,
+        uint256 totalOps,
+        uint256 creation,
+        uint256 lastOp,
+        bool decrypted,
+        uint32 revealedValue
+    ) {
+        return (
+            COUNTER_NAME,
+            status,
+            totalOperations,
+            createdAt,
+            lastOperationTime,
+            isCountDecrypted,
+            decryptedCount
+        );
+    }
+
+    /**
+     * @dev Get system computational limits
+     */
+    function getHCUInfo() external pure returns (
+        uint256 sequentialLimit,
+        uint256 globalLimit,
+        uint256 addCost,
+        uint256 subCost
+    ) {
+        return (
+            1000,  // Sequential operation limit
+            10000, // Global computation limit  
+            65,    // Addition cost in gas
+            65     // Subtraction cost in gas
+        );
+    }
+
+    /**
+     * @dev Check if user has secure authorization
+     * @param user The address to check access for
+     */
+    function isUserAuthorized(address user) external view returns (bool) {
+        return user == owner || authorizedUsers[user];
+    }
+
+    // ============= INTERNAL FUNCTIONS =============
+    
+    /**
+     * @dev Update operation statistics for secure tracking
+     */
+    function _updateOperationStats() internal {
+        totalOperations++;
+        userOperations[msg.sender]++;
+        lastOperationTime = block.timestamp;
+        isCountDecrypted = false; // Mark as needing new revelation
+    }
+    
+    /**
+     * @dev Process operation fee payment
+     */
+    function _processFee() internal {
+        if (msg.value > 0) {
+            contractBalance += msg.value;
+            totalFeesCollected += msg.value;
+            userFeesPaid[msg.sender] += msg.value;
+            
+            // Refund excess payment
+            if (msg.value > operationFee) {
+                payable(msg.sender).transfer(msg.value - operationFee);
+                contractBalance -= (msg.value - operationFee);
+            }
+        }
+    }
+    
+    /**
+     * @dev Get user fee statistics
+     * @param user Address to check fees for
+     */
+    function getUserFeeStats(address user) external view returns (uint256 totalPaid, uint256 operationsCount) {
+        return (userFeesPaid[user], userOperations[user]);
+    }
+    
+    /**
+     * @dev Withdraw collected fees (owner only)
+     */
+    function withdrawFees() external onlyOwner {
+        uint256 amount = contractBalance;
+        require(amount > 0, "No fees to withdraw");
+        
+        contractBalance = 0;
+        payable(owner).transfer(amount);
+    }
+}

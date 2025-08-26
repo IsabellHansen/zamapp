@@ -1,0 +1,377 @@
+.fhe-counter-card {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.encrypted-display {
+  background: var(--dark-gradient);
+  border-radius: var(--border-radius-lg);
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+  text-align: center;
+  color: white;
+  border: 2px solid var(--border-accent);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.3), inset 0 0 20px rgba(255, 0, 110, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.encrypted-display::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(0, 212, 255, 0.1), transparent, rgba(0, 255, 65, 0.1), transparent);
+  animation: matrix-rotate 4s linear infinite;
+  z-index: 0;
+}
+
+.encrypted-display > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes matrix-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.encrypted-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  opacity: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-accent);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.7);
+}
+
+.encrypted-value {
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.encrypted-hash {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.8rem;
+  background: rgba(0, 255, 65, 0.1);
+  padding: 1rem 1.5rem;
+  border-radius: var(--border-radius-md);
+  word-break: break-all;
+  line-height: 1.5;
+  border: 1px solid var(--border-neon);
+  color: var(--success-color);
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.8);
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.encrypted-placeholder {
+  font-family: 'Orbitron', monospace;
+  font-style: normal;
+  opacity: 0.8;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.operation-controls {
+  margin-bottom: 2rem;
+}
+
+.input-with-refresh {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.input-with-refresh .input-field {
+  flex: 1;
+}
+
+.refresh-btn {
+  padding: 0.75rem;
+  min-width: auto;
+  width: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.operation-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.operation-btn {
+  padding: 1rem 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 3rem;
+}
+
+.fhe-info {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.address-info {
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.address-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.address-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 140px;
+}
+
+.address-value {
+  font-family: 'Courier New', monospace;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.75rem;
+  color: #667eea;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.fhe-description {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 640px) {
+  .operation-buttons {
+    grid-template-columns: 1fr;
+  }
+  
+  .address-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .address-label {
+    min-width: auto;
+  }
+  
+  .input-with-refresh {
+    flex-direction: column;
+  }
+  
+  .refresh-btn {
+    width: 100%;
+  }
+}
+
+/* New quantum indicator styles */
+.quantum-indicator {
+  font-size: 1.1rem;
+  margin-top: 0.75rem;
+  animation: quantum-pulse 2s ease-in-out infinite;
+  color: #00d4ff;
+}
+
+@keyframes quantum-pulse {
+  0%, 100% {
+    opacity: 0.8;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.8);
+  }
+  50% {
+    opacity: 1;
+    text-shadow: 0 0 20px rgba(255, 0, 255, 1.0);
+  }
+}
+
+/* Enhanced operation button effects */
+.operation-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.operation-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  transition: all 0.8s ease;
+  transform: translate(-50%, -50%);
+}
+
+.operation-btn:hover::after {
+  width: 400px;
+  height: 400px;
+}
+
+/* Contract Info Styles */
+.contract-info {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 100px;
+}
+
+.info-value {
+  font-family: 'Courier New', monospace;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.8rem;
+  color: #667eea;
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  word-break: break-all;
+}
+
+/* Decrypted Value Display */
+.decrypted-value {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.decrypted-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.8rem;
+  color: var(--text-accent);
+  margin-right: 0.5rem;
+}
+
+.decrypted-count {
+  font-family: 'Orbitron', monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--success-color);
+  text-shadow: 0 0 10px rgba(0, 255, 65, 0.8);
+}
+
+/* Decrypt Controls */
+.decrypt-controls {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.decrypt-btn {
+  width: 100%;
+  padding: 0.75rem;
+  font-weight: 600;
+}
+
+/* Status Message */
+.status-message {
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: var(--border-radius-md);
+  padding: 1rem;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Decrypted Count Display */
+.decrypted-display {
+  background: linear-gradient(135deg, rgba(0, 255, 65, 0.1) 0%, rgba(0, 212, 255, 0.1) 100%);
+  border-radius: var(--border-radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  border: 2px solid rgba(0, 255, 65, 0.3);
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+}
+
+.decrypted-label {
+  font-family: 'Orbitron', monospace;
+  font-size: 0.9rem;
+  color: rgba(0, 255, 65, 0.9);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.count-number {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #00ff41;
+  text-shadow: 0 0 15px rgba(0, 255, 65, 0.8);
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+/* Quantum matrix enhancements */
+.encrypted-display {
+  animation: quantum-field 4s ease-in-out infinite;
+}
+
+@keyframes quantum-field {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.3), inset 0 0 20px rgba(255, 0, 110, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 0, 255, 0.4), inset 0 0 30px rgba(0, 255, 128, 0.2);
+  }
+}

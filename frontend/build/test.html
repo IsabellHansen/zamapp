@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FHEVM Frontend Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .status-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #4CAF50;
+        }
+        .success { border-left-color: #4CAF50; }
+        .info { border-left-color: #2196F3; }
+        .warning { border-left-color: #FF9800; }
+        .contract-info {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #6c63ff, #5a52ff);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 10px 5px;
+            transition: transform 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 99, 255, 0.4);
+        }
+        .emoji { font-size: 1.2rem; }
+        ul { margin: 15px 0; padding-left: 20px; }
+        li { margin: 8px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><span class="emoji">🔐</span> FHEVM Dapp 测试页面 <span class="emoji">🚀</span></h1>
+        
+        <div class="status-card success">
+            <h3><span class="emoji">✅</span> 系统状态：运行正常</h3>
+            <p><strong>前端服务器</strong>: 已启动并可访问</p>
+            <p><strong>网络连接</strong>: Sepolia 测试网</p>
+            <p><strong>FHEVM 集成</strong>: 已修复并优化</p>
+        </div>
+
+        <div class="status-card info">
+            <h3><span class="emoji">📋</span> 已部署的合约</h3>
+            <div class="contract-info">
+                <strong>标准计数器</strong><br>
+                地址: 0xB7bbcD7C5F2110056F6D0Ff98C76a68b94f1C090<br>
+                状态: <span style="color: #4CAF50;">✅ 正常工作</span>
+            </div>
+            <div class="contract-info">
+                <strong>FHE 加密计数器</strong><br>
+                地址: 0x4D55AAD4bf74E3167D75ACB21aD9343c46779393<br>
+                状态: <span style="color: #4CAF50;">✅ 准备接受加密输入</span>
+            </div>
+            <div class="contract-info">
+                <strong>加密投票系统</strong><br>
+                地址: 0x48FBCF9e1d6F36D692D93cf8b760de3D99dF5CF0<br>
+                状态: <span style="color: #4CAF50;">✅ 投票进行中</span>
+            </div>
+        </div>
+
+        <div class="status-card info">
+            <h3><span class="emoji">🔧</span> 测试步骤</h3>
+            <ol>
+                <li><strong>连接钱包</strong>: 使用 MetaMask 连接到 Sepolia 测试网</li>
+                <li><strong>导入测试账户</strong> (可选):
+                    <div class="contract-info">
+                        地址: 0x5b37c38859BB9B55E32Ae8425e0BDA022b9FB910<br>
+                        助记词: bitter aware exercise youth reason arch seek ice loop vapor lady climb<br>
+                        余额: ~9.79 ETH
+                    </div>
+                </li>
+                <li><strong>测试标准计数器</strong>: 应该能正常增加/减少</li>
+                <li><strong>测试 FHE 计数器</strong>: 点击 "Encrypt & Add" 测试加密功能</li>
+                <li><strong>测试加密投票</strong>: 点击 "Vote Yes/No" 测试加密投票</li>
+            </ol>
+        </div>
+
+        <div class="status-card warning">
+            <h3><span class="emoji">⚠️</span> 重要说明</h3>
+            <ul>
+                <li>确保 MetaMask 连接到 <strong>Sepolia 测试网</strong></li>
+                <li>FHEVM 功能需要真实的 Sepolia 网络，本地网络不支持</li>
+                <li>如果遇到错误，请检查网络连接和账户余额</li>
+                <li>加密操作可能需要几秒钟时间完成</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="/" class="button">
+                <span class="emoji">🚀</span> 访问 FHEVM Dapp
+            </a>
+            <button onclick="location.reload()" class="button">
+                <span class="emoji">🔄</span> 刷新页面
+            </button>
+        </div>
+
+        <div style="text-align: center; margin-top: 20px; opacity: 0.8; font-size: 0.9rem;">
+            <p>🔗 访问地址: <strong>http://localhost:3000</strong></p>
+            <p>📱 测试页面: <strong>http://localhost:3000/test.html</strong></p>
+        </div>
+    </div>
+
+    <script>
+        // 简单的状态检查
+        console.log('🎉 FHEVM Frontend Test Page Loaded');
+        console.log('📍 Current URL:', window.location.href);
+        console.log('🕒 Loaded at:', new Date().toLocaleString());
+        
+        // 检查是否有 MetaMask
+        if (typeof window.ethereum !== 'undefined') {
+            console.log('✅ MetaMask detected');
+        } else {
+            console.log('❌ MetaMask not detected');
+        }
+    </script>
+</body>
+</html>

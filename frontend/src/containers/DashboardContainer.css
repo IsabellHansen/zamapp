@@ -1,0 +1,127 @@
+.dashboard-container {
+  flex: 1;
+  padding: 2rem 0;
+}
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.dashboard-title {
+  font-family: 'Orbitron', monospace;
+  font-size: 2.8rem;
+  font-weight: 900;
+  margin: 0 0 0.75rem 0;
+  background: var(--neon-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  text-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+.dashboard-subtitle {
+  font-size: 1.125rem;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 400;
+}
+
+.dashboard-grid {
+  display: grid;
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-grid-three {
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+}
+
+.dashboard-grid-single {
+  grid-template-columns: 1fr;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.fhe-counter-wrapper,
+.standard-counter-wrapper,
+.voting-wrapper {
+  background: var(--bg-glass);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius-xl);
+  padding: 2rem;
+  border: 1px solid var(--border-accent);
+  box-shadow: var(--shadow-medium);
+  transition: all var(--transition-normal);
+  height: fit-content;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.fhe-counter-wrapper:hover,
+.standard-counter-wrapper:hover,
+.voting-wrapper:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-heavy);
+  border-color: var(--text-accent);
+}
+
+/* Reset FHECounterCard styles to fit within wrapper */
+.fhe-counter-wrapper .fhe-counter-card.card {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex: 1;
+}
+
+.fhe-counter-wrapper .fhe-counter-card.card:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.fhe-counter-wrapper .fhe-counter-card.card::before {
+  display: none !important;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid-three {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-grid {
+    max-width: 800px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 1rem 0;
+  }
+  
+  .dashboard-header {
+    margin-bottom: 2rem;
+  }
+  
+  .dashboard-title {
+    font-size: 2rem;
+  }
+  
+  .dashboard-subtitle {
+    font-size: 1rem;
+  }
+  
+  .fhe-counter-wrapper,
+  .standard-counter-wrapper,
+  .voting-wrapper {
+    padding: 1.5rem;
+    min-height: 400px;
+  }
+}
